@@ -44,7 +44,6 @@ After=network.target
 User=nginx
 Group=nginx
 RuntimeDirectory=nginx-cache-purge
-PIDFile=/var/run/nginx-cache-purge/service.pid
 ExecStart=/usr/local/bin/nginx-cache-purge server
 Restart=always
 RestartSec=3s
