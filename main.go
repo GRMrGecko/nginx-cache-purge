@@ -17,7 +17,7 @@ import (
 const (
 	serviceName        = "nginx-cache-purge"
 	serviceDescription = "Tool to help purge Nginx cache "
-	serviceVersion     = "0.1"
+	serviceVersion     = "0.1.1"
 )
 
 // App structure to access global app variables.
@@ -118,11 +118,20 @@ func (a *App) PurgeCache(CachePath string, Key string, ExcludeKeys []string) err
 			}
 			defer file.Close()
 			scanner := bufio.NewScanner(file)
+			// Scan file for the key.
 			for scanner.Scan() {
 				line := scanner.Text()
+				// If line is the key, check if it matches our glob pattern and delete.
 				if strings.HasPrefix(line, "KEY: ") {
-					key := line[5:]
-					if g.Match(key) {
+					keyRead := line[5:]
+					if g.Match(keyRead) {
+						// If excluded, skip the key.
+						if keyIsExcluded(keyRead) {
+							fmt.Println("Key", keyRead, "is excluded, will not purge.")
+							return nil
+						}
+
+						// Delete the file.
 						fmt.Printf("Purging %s as it matches the key %s requested to be purged.\n", filePath, Key)
 						err := os.Remove(filePath)
 						if err != nil {

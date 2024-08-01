@@ -1,5 +1,5 @@
 # nginx-cache-purge
-A tool to help purge Nginx cache. It can either run locally with the purge command, or run as a local unix service to allow for purging by Nginx http requests.
+A tool to help purge Nginx cache. It can either run locally with the purge command, or run as a local unix service to allow for purging by Nginx http requests. The tool supports using wildcard/glob syntax in the purge key to match multiple keys from the cache.
 
 ## Install
 You can install either by downloading the latest binary release, or by building.
@@ -8,6 +8,29 @@ You can install either by downloading the latest binary release, or by building.
 Building should be as simple as running:
 ```
 go build
+```
+
+## Usage
+The following are some examples of ways to purge cache 
+
+### Purge a specific key
+```
+$ nginx-cache-purge purge /var/nginx/proxy_temp/cache example.com/index.html
+```
+
+### Purge all keys for a domain
+```
+$ nginx-cache-purge purge /var/nginx/proxy_temp/cache 'example.com/*'
+```
+
+### Purge all keys for jpeg and png files
+```
+$ nginx-cache-purge purge /var/nginx/proxy_temp/cache 'example.com/*.{jpg,jpeg,png}'
+```
+
+### Purge all keys
+```
+$ nginx-cache-purge purge /var/nginx/proxy_temp/cache '*'
 ```
 
 ## Running as a service
@@ -48,13 +71,13 @@ http {
     }
 
     proxy_cache_path /var/nginx/proxy_temp/cache levels=1:2 keys_zone=my_cache:10m;
-    proxy_cache_key $host$request_uri;
+    proxy_cache_key $server_name$request_uri;
 
     server {
         location / {
             if ($is_purge) {
                 proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
-                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$host$request_uri break;
+                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
             proxy_cache my_cache;
@@ -73,13 +96,13 @@ http {
     }
 
     proxy_cache_path /var/nginx/proxy_temp/cache levels=1:2 keys_zone=my_cache:10m;
-    proxy_cache_key $host$request_uri;
+    proxy_cache_key $server_name$request_uri;
 
     server {
         location / {
             if ($is_purge) {
                 proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
-                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$host$request_uri break;
+                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
             proxy_cache my_cache;
@@ -98,13 +121,13 @@ http {
     }
 
     proxy_cache_path /var/nginx/proxy_temp/cache levels=1:2 keys_zone=my_cache:10m;
-    proxy_cache_key $host$request_uri;
+    proxy_cache_key $server_name$request_uri;
 
     server {
         location / {
             if ($is_purge) {
                 proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
-                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$host$request_uri break;
+                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
             proxy_cache my_cache;
@@ -118,7 +141,7 @@ http {
 ```
 http {
     proxy_cache_path /var/nginx/proxy_temp/cache levels=1:2 keys_zone=my_cache:10m;
-    proxy_cache_key $host$request_uri;
+    proxy_cache_key $server_name$request_uri;
 
     server {
         location / {
@@ -129,7 +152,7 @@ http {
             allow 127.0.0.1;
             deny all;
             proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
-            rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$host$1 break;
+            rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$1 break;
         }
     }
 }
@@ -137,7 +160,7 @@ http {
 
 ## Help
 ```
-$ ./nginx-cache-purge --help  
+$ nginx-cache-purge --help  
 Usage: nginx-cache-purge <command> [flags]
 
 Tool to help purge cache from Nginx
@@ -152,7 +175,7 @@ Commands:
 
 Run "nginx-cache-purge <command> --help" for more information on a command.
 
-$ ./nginx-cache-purge p --help
+$ nginx-cache-purge p --help
 Usage: nginx-cache-purge purge (p) <cache-path> <key> [flags]
 
 Purge cache now
@@ -167,7 +190,7 @@ Flags:
 
       --exclude-key=EXCLUDE-KEY,...    Key to exclude, can be wild card and can add multiple excludes.
 
-$ ./nginx-cache-purge s --help
+$ nginx-cache-purge s --help
 Usage: nginx-cache-purge server (s) [flags]
 
 Run the server
