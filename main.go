@@ -18,7 +18,7 @@ import (
 const (
 	serviceName        = "nginx-cache-purge"
 	serviceDescription = "Tool to help purge Nginx cache "
-	serviceVersion     = "0.1.2"
+	serviceVersion     = "0.1.3"
 )
 
 // App structure to access global app variables.

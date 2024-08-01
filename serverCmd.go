@@ -51,7 +51,7 @@ func (a *ServerCmd) Run() error {
 	// Determine UNIX socket path.
 	unixSocket := a.Socket
 	if unixSocket == "" {
-		unixSocket = "/var/run/nginx-cache-purge/http.sock"
+		unixSocket = "/run/nginx-cache-purge/http.sock"
 	}
 
 	// If socket exists, remove it.

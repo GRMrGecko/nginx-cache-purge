@@ -74,8 +74,9 @@ http {
 
     server {
         location / {
+            proxy_cache_bypass $is_purge;
             if ($is_purge) {
-                proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
+                proxy_pass http://unix:/run/nginx-cache-purge/http.sock;
                 rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
@@ -99,8 +100,9 @@ http {
 
     server {
         location / {
+            proxy_cache_bypass $is_purge;
             if ($is_purge) {
-                proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
+                proxy_pass http://unix:/run/nginx-cache-purge/http.sock;
                 rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
@@ -124,8 +126,45 @@ http {
 
     server {
         location / {
+            proxy_cache_bypass $is_purge;
             if ($is_purge) {
-                proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
+                proxy_pass http://unix:/run/nginx-cache-purge/http.sock;
+                rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
+            }
+
+            proxy_cache my_cache;
+            proxy_pass http://upstream;
+        }
+    }
+}
+```
+
+### Auth via header and IP white list.
+```
+http {
+    map $http_purge_token $is_purge {
+        default 0;
+        nnCgKUx1p2bIABXR 1;
+    }
+
+    geo $purge_allowed {
+        default 0;
+        127.0.0.1 1;
+        192.168.0.0/24 1;
+    }
+
+    proxy_cache_path /var/nginx/proxy_temp/cache levels=1:2 keys_zone=my_cache:10m;
+    proxy_cache_key $server_name$request_uri;
+
+    server {
+        location / {
+            set $should_purge $purge_allowed;
+            if ($is_purge != 1) {
+                set $should_purge 0;
+            }
+            proxy_cache_bypass $should_purge;
+            if ($should_purge) {
+                proxy_pass http://unix:/run/nginx-cache-purge/http.sock;
                 rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$request_uri break;
             }
 
@@ -150,7 +189,7 @@ http {
         location ~ /purge(/.*) {
             allow 127.0.0.1;
             deny all;
-            proxy_pass http://unix:/var/run/nginx-cache-purge/http.sock;
+            proxy_pass http://unix:/run/nginx-cache-purge/http.sock;
             rewrite ^ /?path=/var/nginx/proxy_temp/cache&key=$server_name$1 break;
         }
     }
