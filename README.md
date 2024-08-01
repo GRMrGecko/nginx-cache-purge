@@ -134,3 +134,47 @@ http {
     }
 }
 ```
+
+## Help
+```
+$ ./nginx-cache-purge --help  
+Usage: nginx-cache-purge <command> [flags]
+
+Tool to help purge cache from Nginx
+
+Flags:
+  -h, --help       Show context-sensitive help.
+      --version    Print version information and quit
+
+Commands:
+  server (s)    Run the server
+  purge (p)     Purge cache now
+
+Run "nginx-cache-purge <command> --help" for more information on a command.
+
+$ ./nginx-cache-purge p --help
+Usage: nginx-cache-purge purge (p) <cache-path> <key> [flags]
+
+Purge cache now
+
+Arguments:
+  <cache-path>    Path to cache directory.
+  <key>           Cache key or wildcard match.
+
+Flags:
+  -h, --help                           Show context-sensitive help.
+      --version                        Print version information and quit
+
+      --exclude-key=EXCLUDE-KEY,...    Key to exclude, can be wild card and can add multiple excludes.
+
+$ ./nginx-cache-purge s --help
+Usage: nginx-cache-purge server (s) [flags]
+
+Run the server
+
+Flags:
+  -h, --help             Show context-sensitive help.
+      --version          Print version information and quit
+
+      --socket=STRING    Socket path for HTTP communication.
+``
