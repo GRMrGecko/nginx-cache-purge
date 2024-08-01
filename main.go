@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -17,7 +18,7 @@ import (
 const (
 	serviceName        = "nginx-cache-purge"
 	serviceDescription = "Tool to help purge Nginx cache "
-	serviceVersion     = "0.1.1"
+	serviceVersion     = "0.1.2"
 )
 
 // App structure to access global app variables.
@@ -62,7 +63,7 @@ func (a *App) PurgeCache(CachePath string, Key string, ExcludeKeys []string) err
 	if !globRegex.MatchString(Key) {
 		// If excluded, skip the key.
 		if keyIsExcluded(Key) {
-			fmt.Println("Key", Key, "is excluded, will not purge.")
+			log.Println("Key", Key, "is excluded, will not purge.")
 			return nil
 		}
 
@@ -82,7 +83,7 @@ func (a *App) PurgeCache(CachePath string, Key string, ExcludeKeys []string) err
 			}
 			// If this file matches our key hash then delete.
 			if info.Name() == keyHash {
-				fmt.Printf("Purging %s as it matches the key %s requested to be purged.\n", filePath, Key)
+				log.Printf("Purging %s as it matches the key %s requested to be purged.\n", filePath, Key)
 				err := os.Remove(filePath)
 				if err != nil {
 					return err
@@ -127,12 +128,12 @@ func (a *App) PurgeCache(CachePath string, Key string, ExcludeKeys []string) err
 					if g.Match(keyRead) {
 						// If excluded, skip the key.
 						if keyIsExcluded(keyRead) {
-							fmt.Println("Key", keyRead, "is excluded, will not purge.")
+							log.Println("Key", keyRead, "is excluded, will not purge.")
 							return nil
 						}
 
 						// Delete the file.
-						fmt.Printf("Purging %s as it matches the key %s requested to be purged.\n", filePath, Key)
+						log.Printf("Purging %s as it matches the key %s requested to be purged.\n", filePath, Key)
 						err := os.Remove(filePath)
 						if err != nil {
 							return err

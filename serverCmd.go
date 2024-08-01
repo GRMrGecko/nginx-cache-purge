@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -66,7 +67,7 @@ func (a *ServerCmd) Run() error {
 	defer listener.Close()
 
 	// Start the FastCGI server.
-	fmt.Println("Starting server at", unixSocket)
+	log.Println("Starting server at", unixSocket)
 	http.HandleFunc("/", a.ServeHTTP)
 	err = http.Serve(listener, nil)
 
