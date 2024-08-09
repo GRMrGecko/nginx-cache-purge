@@ -18,7 +18,7 @@ import (
 const (
 	serviceName        = "nginx-cache-purge"
 	serviceDescription = "Tool to help purge Nginx cache "
-	serviceVersion     = "0.1.3"
+	serviceVersion     = "0.1.4"
 )
 
 // App structure to access global app variables.
@@ -43,7 +43,7 @@ func (a *App) PurgeCache(CachePath string, Key string, ExcludeKeys []string) err
 		for _, exclude := range ExcludeKeys {
 			if globRegex.MatchString(exclude) {
 				g, err := glob.Compile(exclude)
-				if err != nil && g != nil && g.Match(Key) {
+				if err == nil && g != nil && g.Match(Key) {
 					return true
 				}
 			}
